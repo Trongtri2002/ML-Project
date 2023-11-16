@@ -1,5 +1,6 @@
 # SVM
 set.seed(1)
+Heart <- read.csv('Heart.csv')
 attach(Heart)
 summary(Heart)
 library(e1071)
@@ -10,11 +11,22 @@ library(MASS)
 library(magrittr)
 library(ggplot2)
 library(GGally)
+
+#BIẾN ĐỔI 
+chestpain <- as.factor(Heart$ChestPain)
+Heart$ChestPain <- chestpain
+thal <- as.factor(Heart$Thal)
+Heart$Thal <- thal
+ahd <- as.factor(Heart$AHD)
+Heart$AHD <- ahd
+
+
 heart1 <- Heart %>% dplyr::select(-c(X,Sex,ChestPain,RestECG,ExAng,Slope,Thal))
 ggpairs(heart1, ggplot2::aes(colour=AHD))
 sample <- sample(c(TRUE, FALSE), nrow(Heart), replace=TRUE, prob=c(0.7,0.3))
 train.Heart <- Heart[sample,]  
 test.Heart<- Heart[!sample,]  
+head(train.Heart)
 
 svmfit <- svm (AHD~., data = train.Heart , kernel ='linear',
                cost = 0.1, scale = FALSE )
