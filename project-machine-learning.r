@@ -1,4 +1,4 @@
-# SVM
+# importing libraries
 set.seed(1)
 Heart <- read.csv('Heart.csv')
 attach(Heart)
@@ -12,7 +12,7 @@ library(magrittr)
 library(ggplot2)
 library(GGally)
 
-#BIẾN ĐỔI 
+# Converting datatype 
 chestpain <- as.factor(Heart$ChestPain)
 Heart$ChestPain <- chestpain
 thal <- as.factor(Heart$Thal)
@@ -20,14 +20,17 @@ Heart$Thal <- thal
 ahd <- as.factor(Heart$AHD)
 Heart$AHD <- ahd
 
-
+# data visualisation: scatter plot, histogram 
 heart1 <- Heart %>% dplyr::select(-c(X,Sex,ChestPain,RestECG,ExAng,Slope,Thal))
 ggpairs(heart1, ggplot2::aes(colour=AHD))
+
+# splitting dataset to testing and training sets
 sample <- sample(c(TRUE, FALSE), nrow(Heart), replace=TRUE, prob=c(0.7,0.3))
 train.Heart <- Heart[sample,]  
 test.Heart<- Heart[!sample,]  
 head(train.Heart)
 
+# training SVM models 
 svmfit <- svm (AHD~., data = train.Heart , kernel ='linear',
                cost = 0.1, scale = FALSE )
 plot(svmfit, train.Heart, RestBP~MaxHR)
@@ -73,7 +76,8 @@ summary(bestmod2)
 AHDpred2 <- predict(bestmod2, test.Heart)
 table(predict= AHDpred2, truth = test.Heart$AHD)
 plot(bestmod2, train.Heart, RestBP~MaxHR)
-#ROCcurve for training
+
+#ROCcurve metrics on training dataset
 svmfit.opt <- svm(AHD~., data = train.Heart , kernel ='linear',
                   cost = 0.1, scale = FALSE, decision.value = T )
 fitted <- attributes (
@@ -125,7 +129,8 @@ fitted5 <- attributes(
 pred5 <- prediction(fitted5,train.Heart$AHD)
 perf5 <- performance(pred5,'tpr','fpr')
 plot(perf5, add=T, col='pink')
-# ROC curve for test
+
+# ROC curve metric for testing dataset
 fitted.test <- attributes (
   predict ( svmfit.opt , test.Heart, decision.values = TRUE )
 )$ decision.values
