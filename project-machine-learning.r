@@ -77,6 +77,11 @@ AHDpred2 <- predict(bestmod2, test.Heart)
 table(predict= AHDpred2, truth = test.Heart$AHD)
 plot(bestmod2, train.Heart, RestBP~MaxHR)
 
+#Training random forest
+rf_model <- randomForest(AHD ~.-X, data = train.Heart, ntree = 500, mtry = 3.6)
+predictions <- predict(rf_model, newdata = test.Heart)
+confusionMatrix(predictions, test.Heart$AHD,positive='Yes')
+
 #ROCcurve metrics on training dataset
 svmfit.opt <- svm(AHD~., data = train.Heart , kernel ='linear',
                   cost = 0.1, scale = FALSE, decision.value = T )
@@ -130,6 +135,11 @@ pred5 <- prediction(fitted5,train.Heart$AHD)
 perf5 <- performance(pred5,'tpr','fpr')
 plot(perf5, add=T, col='pink')
 
+fitted6 <- predict(rf_model, newdata = train.Heart, type = "prob")
+pred6 <- prediction(fitted6[,2],train.Heart$AHD)
+perf6 <- performance(pred6,'tpr','fpr')
+plot(perf6, add=T, col='orange')
+
 # ROC curve metric for testing dataset
 fitted.test <- attributes (
   predict ( svmfit.opt , test.Heart, decision.values = TRUE )
@@ -170,3 +180,8 @@ fitted5.test <- attributes(
 pred.test5 <- prediction(fitted5.test, test.Heart$AHD)
 perf.test5 <- performance(pred.test5,'tpr','fpr')
 plot(perf.test5, add=T, col='pink')
+
+fitted6.test <- predict(rf_model, newdata = test.Heart, type = "prob")
+pred6.test <- prediction(fitted6.test[,2],test.Heart$AHD)
+perf6.test <- performance(pred6.test,'tpr','fpr')
+plot(perf6.test, add=T, col='orange')
